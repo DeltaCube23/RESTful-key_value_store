@@ -13,6 +13,7 @@ type linkedlist struct {
 	size int
 }
 
+//Creates a new instance of linkedlist
 func newLinkedList() *linkedlist {
 	return &linkedlist{
 		head: nil,
@@ -20,6 +21,7 @@ func newLinkedList() *linkedlist {
 	}
 }
 
+//Check is list is empty
 func (ll *linkedlist) isEmpty() bool {
 	if ll.head == nil {
 		return true
@@ -27,6 +29,7 @@ func (ll *linkedlist) isEmpty() bool {
 	return false
 }
 
+//Adds a new pair to linkedlist
 func (ll *linkedlist) add(strA, strB string) {
 	newNode := &node{
 		next: nil,
@@ -40,12 +43,13 @@ func (ll *linkedlist) add(strA, strB string) {
 	ll.size++
 }
 
-func (ll *linkedlist) remove(str string) {
+//Removes the corresponding key value pair
+func (ll *linkedlist) remove(str string) bool {
 	var newNode = ll.head
 	if newNode.key == str {
 		ll.head = ll.head.next
 		ll.size--
-		return
+		return true
 	}
 	for {
 		if newNode.next == nil {
@@ -54,13 +58,14 @@ func (ll *linkedlist) remove(str string) {
 		if newNode.next.key == str {
 			newNode.next = newNode.next.next
 			ll.size--
-			return
+			return true
 		}
 		newNode = newNode.next
 	}
-	fmt.Println("No such key value pair exists")
+	return false
 }
 
+//To view the contents of a bucket
 func (ll *linkedlist) printlist() {
 	var newNode = ll.head
 	for {

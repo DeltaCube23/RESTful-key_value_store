@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"sync"
+
+	"github.com/gorilla/mux"
 )
 
 const (
@@ -14,6 +16,11 @@ const (
 type store struct {
 	db [length]*linkedlist
 	mu sync.RWMutex
+}
+
+//creates a new instance of key value store
+func newStore() *store {
+	return &store{}
 }
 
 //test handler
@@ -45,8 +52,9 @@ func (kv *store) postHandler(w http.ResponseWriter, r *http.Request) {
 
 	kv.mu.Lock()
 	fmt.Fprintf(w, "POST request successful\n")
-	name := r.FormValue("name")
 	address := r.FormValue("address")
+	params := mux.Vars(r)
+	name := params["key"]
 
 	fmt.Fprintf(w, "Name = %s\n", name)
 	fmt.Fprintf(w, "Address = %s\n", address)
@@ -63,9 +71,14 @@ func (kv *store) getHandler(w http.ResponseWriter, r *http.Request) {
 
 	kv.mu.RLock()
 	fmt.Fprintf(w, "GET request successful\n")
-	key := r.URL.Query().Get("name")
+	params := mux.Vars(r)
+	key := params["key"]
 	addr := kv.Get(key)
-	fmt.Fprintf(w, "Address = %s\n", addr)
+	if addr == "Invalid" {
+		fmt.Fprintf(w, "Invalid key value pair\n")
+	} else {
+		fmt.Fprintf(w, "Address = %s\n", addr)
+	}
 	kv.mu.RUnlock()
 }
 
@@ -83,8 +96,9 @@ func (kv *store) putHandler(w http.ResponseWriter, r *http.Request) {
 
 	kv.mu.Lock()
 	fmt.Fprintf(w, "PUT request successful\n")
-	name := r.FormValue("name")
 	address := r.FormValue("address")
+	params := mux.Vars(r)
+	name := params["key"]
 	ok := kv.Put(name, address)
 
 	if ok == true {
@@ -105,7 +119,8 @@ func (kv *store) deleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	kv.mu.Lock()
 	fmt.Fprintf(w, "DELETE request successful\n")
-	key := r.URL.Path[8:]
+	params := mux.Vars(r)
+	key := params["key"]
 	ok := kv.Delete(key)
 
 	if ok == true {
@@ -116,22 +131,18 @@ func (kv *store) deleteHandler(w http.ResponseWriter, r *http.Request) {
 	kv.mu.Unlock()
 }
 
-//creates a new instance of key value store
-func newStore() *store {
-	return &store{}
-}
-
 func main() {
 	kv := newStore()
-	http.HandleFunc("/kvstore", kv.kvstoreHandler)
-	http.HandleFunc("/create", kv.postHandler)
-	http.HandleFunc("/read/", kv.getHandler)
-	http.HandleFunc("/update", kv.putHandler)
-	http.HandleFunc("/delete/", kv.deleteHandler)
+	r := mux.NewRouter()
+	r.HandleFunc("/kvstore", kv.kvstoreHandler).Methods("GET")
+	r.HandleFunc("/{key}", kv.postHandler).Methods("POST")
+	r.HandleFunc("/{key}", kv.getHandler).Methods("GET")
+	r.HandleFunc("/{key}", kv.putHandler).Methods("PUT")
+	r.HandleFunc("/{key}", kv.deleteHandler).Methods("DELETE")
 
 	//Start the server and listen for requests
 	fmt.Printf("Starting server at port 8080\n")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", r); err != nil {
 		log.Fatal(err)
 	}
 }

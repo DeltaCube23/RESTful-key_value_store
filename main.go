@@ -56,9 +56,14 @@ func (kv *store) postHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	name := params["key"]
 
-	fmt.Fprintf(w, "Name = %s\n", name)
-	fmt.Fprintf(w, "Address = %s\n", address)
-	kv.Push(name, address)
+	duplicate := kv.Get(name)
+	if duplicate == "Invalid" {
+		fmt.Fprintf(w, "Name = %s\n", name)
+		fmt.Fprintf(w, "Address = %s\n", address)
+		kv.Push(name, address)
+	} else {
+		fmt.Fprintf(w, "This name already exists")
+	}
 	kv.mu.Unlock()
 }
 

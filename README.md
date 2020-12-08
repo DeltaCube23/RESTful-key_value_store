@@ -1,5 +1,6 @@
 # RESTful-key_value_store
 
+The application uses gorilla/mux and has also been dockerized<br>
 Use curl to access the key value store and perform any of the CRUD functions<br>
 
 POST request : ```curl -d "address=<value>" -X POST http://localhost:8080/<key>```<br>

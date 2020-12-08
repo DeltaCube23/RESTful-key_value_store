@@ -7,3 +7,6 @@ POST request : ```curl -d "address=<value>" -X POST http://localhost:8080/<key>`
 GET request : ```curl -X GET  http://localhost:8080/read/<key>```<br>
 PUT request : ```curl -d "address=<value>" -X PUT http://localhost:8080/<key>```<br>
 DELETE request : ```curl -X DELETE  http://localhost:8080/<key>```<br>
+
+To build docker image use : ```docker build -t <dockerimage> .```
+To run docker container use : ```docker run -d -p 8080:8080 <dockerimage>```

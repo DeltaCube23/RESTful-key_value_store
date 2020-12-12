@@ -52,17 +52,17 @@ func (kv *store) postHandler(w http.ResponseWriter, r *http.Request) {
 
 	kv.mu.Lock()
 	fmt.Fprintf(w, "POST request successful\n")
-	address := r.FormValue("address")
+	value := r.FormValue("value")
 	params := mux.Vars(r)
-	name := params["key"]
+	key := params["key"]
 
-	duplicate := kv.Get(name)
+	duplicate := kv.Get(key)
 	if duplicate == "Invalid" {
-		fmt.Fprintf(w, "Name = %s\n", name)
-		fmt.Fprintf(w, "Address = %s\n", address)
-		kv.Push(name, address)
+		fmt.Fprintf(w, "Key = %s\n", key)
+		fmt.Fprintf(w, "Value = %s\n", value)
+		kv.Push(key, value)
 	} else {
-		fmt.Fprintf(w, "This name already exists")
+		fmt.Fprintf(w, "This key already exists")
 	}
 	kv.mu.Unlock()
 }
@@ -78,11 +78,11 @@ func (kv *store) getHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "GET request successful\n")
 	params := mux.Vars(r)
 	key := params["key"]
-	addr := kv.Get(key)
-	if addr == "Invalid" {
+	value := kv.Get(key)
+	if value == "Invalid" {
 		fmt.Fprintf(w, "Invalid key value pair\n")
 	} else {
-		fmt.Fprintf(w, "Address = %s\n", addr)
+		fmt.Fprintf(w, "Value = %s\n", value)
 	}
 	kv.mu.RUnlock()
 }
@@ -101,14 +101,14 @@ func (kv *store) putHandler(w http.ResponseWriter, r *http.Request) {
 
 	kv.mu.Lock()
 	fmt.Fprintf(w, "PUT request successful\n")
-	address := r.FormValue("address")
+	value := r.FormValue("value")
 	params := mux.Vars(r)
-	name := params["key"]
-	ok := kv.Put(name, address)
+	key := params["key"]
+	ok := kv.Put(key, value)
 
 	if ok == true {
-		fmt.Fprintf(w, "Name = %s\n", name)
-		fmt.Fprintf(w, "Address = %s\n", address)
+		fmt.Fprintf(w, "Key = %s\n", key)
+		fmt.Fprintf(w, "Value = %s\n", value)
 	} else {
 		fmt.Fprintf(w, "Invalid key value pair\n")
 	}
@@ -129,7 +129,7 @@ func (kv *store) deleteHandler(w http.ResponseWriter, r *http.Request) {
 	ok := kv.Delete(key)
 
 	if ok == true {
-		fmt.Fprintf(w, "Removed Name = %s\n", key)
+		fmt.Fprintf(w, "Removed Key = %s\n", key)
 	} else {
 		fmt.Fprintf(w, "Invalid key value pair\n")
 	}
